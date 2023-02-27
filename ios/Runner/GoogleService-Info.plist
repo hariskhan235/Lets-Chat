@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>559591399364-0orhb9l3unv06ab40p4gjvu19a3866kk.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.559591399364-0orhb9l3unv06ab40p4gjvu19a3866kk</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCQRw1lLxQL80NH1dWFuFOhM-5DXHFX3hU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>559591399364</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.fastgrowmore.letsChat</string>
+	<key>PROJECT_ID</key>
+	<string>lets-chat-f05a6</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lets-chat-f05a6.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:559591399364:ios:97eb50a4f0ab3f8d748e91</string>
+</dict>
+</plist>

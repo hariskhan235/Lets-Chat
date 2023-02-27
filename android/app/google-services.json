@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "559591399364",
+    "project_id": "lets-chat-f05a6",
+    "storage_bucket": "lets-chat-f05a6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559591399364:android:aed6eb84c8d4b835748e91",
+        "android_client_info": {
+          "package_name": "com.fastgrowmore.lets_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "559591399364-l70uhak2ogtmrd6lldmgd4kf8c72382a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastgrowmore.lets_chat",
+            "certificate_hash": "ad2d284e3d19487963b303567afdebf9bbd5d360"
+          }
+        },
+        {
+          "client_id": "559591399364-l1322ds5pan5g2v7lfb3ecnms56mhdri.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaNyS9QXduxd2nYvlVpVfiz-w6hSyB0tQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "559591399364-6n4pc0j56l1hmf4djd4b44mlsetngv7o.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "559591399364-0orhb9l3unv06ab40p4gjvu19a3866kk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fastgrowmore.letsChat"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
