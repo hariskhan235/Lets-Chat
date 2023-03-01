@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Let\'s chat',
       theme: ThemeData(
-        useMaterial3: true,
+        //useMaterial3: true,
         appBarTheme: AppBarTheme(
           elevation: 1,
           centerTitle: true,
