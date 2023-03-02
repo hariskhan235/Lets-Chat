@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 
+// ignore: must_be_immutable
 class ChatUserCard extends StatefulWidget {
   ChatUserCard({super.key, required this.user});
   late ChatUserModel user;
@@ -23,16 +25,23 @@ class _ChatUserCardState extends State<ChatUserCard> {
       ),
       child: InkWell(
         child: ListTile(
-          leading: CircleAvatar(
-            child: Icon(CupertinoIcons.person),
-          ),
-          title: Text(widget.user.name),
-          subtitle: Text(widget.user.about),
-          trailing: Text(
-            '12:00 pm',
-            style: TextStyle(color: Colors.black45),
-          ),
-        ),
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(widget.user.image),
+            ),
+            title: Text(widget.user.name),
+            subtitle: Text(widget.user.about),
+            trailing: Container(
+              width: 15,
+              height: 15,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.greenAccent.shade100),
+            )
+            // trailing: Text(
+            //   '12:00 pm',
+            //   style: TextStyle(color: Colors.black45),
+            // ),
+            ),
       ),
     );
   }

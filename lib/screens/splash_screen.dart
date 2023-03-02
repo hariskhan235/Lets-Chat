@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lets_chat/apis/apis.dart';
@@ -21,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(milliseconds: 1500), () {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+          SystemUiOverlayStyle(systemNavigationBarColor: Colors.white));
       if (APIs.auth.currentUser != null) {
         print('User : ${APIs.auth.currentUser}');
         _navigateToHome();
