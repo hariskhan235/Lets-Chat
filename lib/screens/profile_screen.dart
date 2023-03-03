@@ -110,6 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: Text('Name'),
                     ),
                   ),
+
                   SizedBox(
                     //width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height * .03,
@@ -227,6 +228,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     setState(() {
                       _image = image.path;
                     });
+                    APIs.updateProfileImage(
+                      File(_image!),
+                    );
                   } else {
                     Navigator.pop(context);
                   }
@@ -251,6 +255,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     setState(() {
                       _image = image.path;
                     });
+                    APIs.updateProfileImage(
+                      File(_image!),
+                    );
                   } else {
                     Navigator.pop(context);
                   }
