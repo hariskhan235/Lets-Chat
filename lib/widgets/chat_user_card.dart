@@ -1,7 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lets_chat/apis/apis.dart';
+import 'package:lets_chat/helpers/my_data_util.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
+import 'package:lets_chat/models/message_model.dart';
 import 'package:lets_chat/screens/chat_screen.dart';
 
 // ignore: must_be_immutable
@@ -22,6 +23,8 @@ class _ChatUserCardState extends State<ChatUserCard> {
     );
   }
 
+  MessageModel? _message;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -34,19 +37,41 @@ class _ChatUserCardState extends State<ChatUserCard> {
       ),
       child: InkWell(
         onTap: () => _navigateToChatScreen(),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(widget.user.image),
-          ),
-          title: Text(widget.user.name),
-          subtitle: Text(widget.user.about),
-          trailing: Container(
-            width: 15,
-            height: 15,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.greenAccent.shade100),
-          ),
+        child: StreamBuilder(
+          stream: APIs.getLastMessage(widget.user),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.docs;
+
+            final list =
+                data?.map((e) => MessageModel.fromJson(e.data())).toList() ??
+                    [];
+            if (list.isNotEmpty) _message = list[0];
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(widget.user.image),
+              ),
+              title: Text(widget.user.name),
+              subtitle:
+                  Text(_message != null ? _message!.msg : widget.user.about),
+              trailing: _message == null
+                  ? null
+                  // : _message!.read.isEmpty && _message!.fromId != APIs.user.uid
+                  //     ? Container(
+                  //         width: 15,
+                  //         height: 15,
+                  //         decoration: BoxDecoration(
+                  //             borderRadius: BorderRadius.circular(10),
+                  //             color: Colors.greenAccent.shade100),
+                  //       )
+                  : Text(
+                      // MyDateUtil.getLastMessageTime(
+                      //     context: context, time: _message!.sent
+                      _message!.sent,
+
+                      style: TextStyle(color: Colors.black54),
+                    ),
+            );
+          },
         ),
       ),
     );

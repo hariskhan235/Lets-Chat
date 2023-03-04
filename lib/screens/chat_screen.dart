@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/models/message_model.dart';
@@ -16,60 +19,78 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   List<MessageModel> _list = [];
   final _messageController = TextEditingController();
+  bool showEmoji = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        flexibleSpace: _appBar(),
-      ),
-      backgroundColor: Color.fromARGB(255, 221, 245, 255),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder(
-                stream: APIs.getAllMessages(widget.user),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    case ConnectionState.done:
-                    case ConnectionState.active:
-                      final data = snapshot.data?.docs;
-
-                      _list = data!
-                              .map((e) => MessageModel.fromJson(e.data()))
-                              .toList() ??
-                          [];
-
-                      if (_list.isNotEmpty) {
-                        return ListView.builder(
-                            itemCount: _list.length,
-                            padding: EdgeInsets.only(
-                                top: MediaQuery.of(context).size.height * .01),
-                            physics: BouncingScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return MessageCard(
-                                message: _list[index],
-                              );
-                            });
-                      } else {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          flexibleSpace: _appBar(),
+        ),
+        backgroundColor: Color.fromARGB(255, 221, 245, 255),
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                  stream: APIs.getAllMessages(widget.user),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                      case ConnectionState.none:
                         return Center(
-                          child: Text('Say Hii..'),
+                          child: CircularProgressIndicator(),
                         );
-                      }
+                      case ConnectionState.done:
+                      case ConnectionState.active:
+                        final data = snapshot.data?.docs;
 
-                    default:
-                      break;
-                  }
-                  return Text('Data');
-                }),
-          ),
-          _messageField(),
-        ],
+                        _list = data!
+                            .map((e) => MessageModel.fromJson(e.data()))
+                            .toList();
+
+                        if (_list.isNotEmpty) {
+                          return ListView.builder(
+                              itemCount: _list.length,
+                              padding: EdgeInsets.only(
+                                  top:
+                                      MediaQuery.of(context).size.height * .01),
+                              physics: BouncingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                return MessageCard(
+                                  message: _list[index],
+                                );
+                              });
+                        } else {
+                          return Center(
+                            child: Text('Say Hii..'),
+                          );
+                        }
+
+                      default:
+                        break;
+                    }
+                    return Text('Data');
+                  }),
+            ),
+            _messageField(),
+            showEmoji
+                ? SizedBox(
+                    height: MediaQuery.of(context).size.height * .35,
+                    width: MediaQuery.of(context).size.width,
+                    child: EmojiPicker(
+                      textEditingController: _messageController,
+                      config: Config(
+                        bgColor: Colors.white,
+                        columns: 7,
+                        emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                      ),
+                    ),
+                  )
+                : SizedBox()
+          ],
+        ),
       ),
     );
   }
@@ -134,7 +155,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          showEmoji = !showEmoji;
+                        });
+                      },
                       icon: Icon(
                         Icons.emoji_emotions,
                         color: Colors.blueAccent,
@@ -142,6 +167,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     Expanded(
                       child: TextField(
+                        onTap: () {
+                          if (showEmoji) {
+                            setState(() {
+                              showEmoji = !showEmoji;
+                            });
+                          }
+                        },
                         controller: _messageController,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(

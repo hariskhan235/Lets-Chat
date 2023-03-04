@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/models/message_model.dart';
 
@@ -101,6 +103,7 @@ class APIs {
         .collection('chats/${getConversationId(chatUser.id)}/messages/');
 
     final time = DateTime.now().millisecondsSinceEpoch.toString();
+    String formattedDate = DateFormat().add_jm().format(DateTime.now());
 
     final message = MessageModel(
         msg: msg,
@@ -108,10 +111,27 @@ class APIs {
         read: '',
         type: MessageType.text,
         fromId: user.uid,
-        sent: time);
+        sent: formattedDate);
 
     await ref.doc(time).set(
           message.toJson(),
         );
+  }
+
+  static Future<void> updateMessageReadStatus(MessageModel message) async {
+    firestore
+        .collection('chats/${getConversationId(message.fromId)}/messages/')
+        .doc(message.sent)
+        .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+  }
+
+  //get only last message of a specific chat
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
+      ChatUserModel user) {
+    return firestore
+        .collection('chats/${getConversationId(user.id)}/messages/')
+        .orderBy('sent', descending: true)
+        .limit(1)
+        .snapshots();
   }
 }

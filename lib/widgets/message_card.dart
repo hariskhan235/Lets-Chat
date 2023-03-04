@@ -22,16 +22,26 @@ class _MessageCardState extends State<MessageCard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // SizedBox(
+        //   width: MediaQuery.of(context).size.width * .04,
+        // ),
+        // if (widget.message.read.isEmpty)
+        //   Icon(
+        //     Icons.done_all_rounded,
+        //     size: 20,
+        //     color: Colors.blue,
+        //   ),
         Row(
           children: [
             SizedBox(
               width: MediaQuery.of(context).size.width * .04,
             ),
-            Icon(
-              Icons.done_all_rounded,
-              size: 20,
-              color: Colors.blue,
-            ),
+            if (widget.message.read.isNotEmpty)
+              Icon(
+                Icons.done_all_rounded,
+                size: 20,
+                color: Colors.blue,
+              ),
             SizedBox(
               width: 2,
             ),
@@ -68,6 +78,9 @@ class _MessageCardState extends State<MessageCard> {
   }
 
   Widget _blueMessage() {
+    // if (widget.message.read.isEmpty) {
+    //   APIs.updateMessageReadStatus(widget.message);
+    // }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
