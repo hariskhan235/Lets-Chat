@@ -25,7 +25,7 @@ class ChatUserModel {
     name = json['name'] ?? '';
     about = json['about'] ?? '';
     createdAt = json['created_at'] ?? '';
-    lastActive = json['last_active'] ?? '';
+    lastActive = json['last_active'].toString();
     id = json['id'] ?? '';
     isOnline = json['is_online'] ?? '';
     email = json['email'] ?? '';

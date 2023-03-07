@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lets_chat/apis/apis.dart';
-import 'package:lets_chat/helpers/my_data_util.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/models/message_model.dart';
 import 'package:lets_chat/screens/chat_screen.dart';
+import 'package:lets_chat/widgets/dialogs/profile_dialog.dart';
 
 // ignore: must_be_immutable
 class ChatUserCard extends StatefulWidget {
@@ -47,12 +47,25 @@ class _ChatUserCardState extends State<ChatUserCard> {
                     [];
             if (list.isNotEmpty) _message = list[0];
             return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(widget.user.image),
+              leading: InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ProfileDialog(
+                      user: widget.user,
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.user.image),
+                ),
               ),
               title: Text(widget.user.name),
-              subtitle:
-                  Text(_message != null ? _message!.msg : widget.user.about),
+              subtitle: Text(_message != null
+                  ? _message!.type == MessageType.image
+                      ? 'image'
+                      : _message!.msg
+                  : widget.user.about),
               trailing: _message == null
                   ? null
                   // : _message!.read.isEmpty && _message!.fromId != APIs.user.uid

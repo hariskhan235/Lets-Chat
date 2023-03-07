@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:lets_chat/helpers/my_data_util.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/models/message_model.dart';
+import 'package:lets_chat/screens/view_profile.dart';
 import 'package:lets_chat/widgets/message_card.dart';
 
 import '../apis/apis.dart';
@@ -19,7 +22,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   List<MessageModel> _list = [];
   final _messageController = TextEditingController();
-  bool showEmoji = false;
+  bool showEmoji = false, _isUploading = false;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -52,6 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                         if (_list.isNotEmpty) {
                           return ListView.builder(
+                              reverse: true,
                               itemCount: _list.length,
                               padding: EdgeInsets.only(
                                   top:
@@ -74,6 +78,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     return Text('Data');
                   }),
             ),
+            if (_isUploading)
+              CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
             _messageField(),
             showEmoji
                 ? SizedBox(
@@ -97,46 +105,72 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _appBar() {
     return SafeArea(
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.arrow_back,
-              //color: Colors.black,
-            ),
-          ),
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage(widget.user.image),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.user.name,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+      child: StreamBuilder(
+          stream: APIs.getUserInfo(widget.user),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.docs;
+
+            final list =
+                data?.map((e) => ChatUserModel.fromJson(e.data())).toList() ??
+                    [];
+            //if (list.isNotEmpty) _message = list[0];
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ViewProfileScreen(user: widget.user),
+                  ),
+                );
+              },
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: Icon(
+                      Icons.arrow_back,
+                      //color: Colors.black,
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(
+                        list.isNotEmpty ? list[0].image : widget.user.image),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        list.isNotEmpty ? list[0].name : widget.user.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        list.isNotEmpty
+                            ? list[0].isOnline
+                                ? 'Online'
+                                : MyDateUtil.getLastactiveTime(
+                                    context, list[0].lastActive)
+                            : MyDateUtil.getLastactiveTime(
+                                context, widget.user.lastActive),
+                        style: TextStyle(
+                          fontSize: 13,
+                          //fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
               ),
-              Text(
-                'Last seen not available',
-                style: TextStyle(
-                  fontSize: 13,
-                  //fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+            );
+          }),
     );
   }
 
@@ -183,14 +217,49 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final List<XFile> images =
+                            await picker.pickMultiImage(imageQuality: 70);
+                        // if (images != null) {
+                        //   await APIs.sendChatImage(
+                        //     widget.user,
+                        //     File(file.path),
+                        //   );
+                        // }
+                        for (var i in images) {
+                          setState(() {
+                            _isUploading = true;
+                          });
+                          await APIs.sendChatImage(widget.user, File(i.path));
+                          setState(() {
+                            _isUploading = false;
+                          });
+                        }
+                      },
                       icon: Icon(
                         Icons.image,
                         color: Colors.blueAccent,
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? file =
+                            await picker.pickImage(source: ImageSource.camera);
+                        if (file != null) {
+                          setState(() {
+                            _isUploading = true;
+                          });
+                          await APIs.sendChatImage(
+                            widget.user,
+                            File(file.path),
+                          );
+                          setState(() {
+                            _isUploading = false;
+                          });
+                        }
+                      },
                       icon: Icon(
                         Icons.camera_alt_rounded,
                         color: Colors.blueAccent,
@@ -206,10 +275,9 @@ class _ChatScreenState extends State<ChatScreen> {
               shape: CircleBorder(),
               onPressed: () {
                 if (_messageController.text.isNotEmpty) {
-                  APIs.sendMessage(
-                    widget.user,
-                    _messageController.text.trim(),
-                  ).then((value) {
+                  APIs.sendMessage(widget.user, _messageController.text.trim(),
+                          MessageType.text)
+                      .then((value) {
                     _messageController.text = '';
                   });
                 }

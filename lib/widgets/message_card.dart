@@ -67,10 +67,21 @@ class _MessageCardState extends State<MessageCard> {
               ),
               border: Border.all(color: Colors.lightGreen),
             ),
-            child: Text(
-              widget.message.msg,
-              style: TextStyle(fontSize: 15, color: Colors.black54),
-            ),
+            child: widget.message.type == MessageType.text
+                ? Text(
+                    widget.message.msg,
+                    style: TextStyle(fontSize: 15, color: Colors.black54),
+                  )
+                : Container(
+                    width: MediaQuery.of(context).size.width * .5,
+                    height: MediaQuery.of(context).size.height * .3,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(widget.message.msg),
+                      ),
+                    ),
+                  ),
           ),
         ),
       ],
@@ -109,10 +120,21 @@ class _MessageCardState extends State<MessageCard> {
         Padding(
           padding:
               EdgeInsets.only(right: MediaQuery.of(context).size.width * .04),
-          child: Text(
-            widget.message.sent,
-            style: TextStyle(fontSize: 13, color: Colors.black54),
-          ),
+          child: widget.message.type == MessageType.text
+              ? Text(
+                  widget.message.msg,
+                  style: TextStyle(fontSize: 15, color: Colors.black54),
+                )
+              : Container(
+                  width: MediaQuery.of(context).size.width * .5,
+                  height: MediaQuery.of(context).size.height * .3,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(widget.message.msg),
+                    ),
+                  ),
+                ),
         ),
       ],
     );

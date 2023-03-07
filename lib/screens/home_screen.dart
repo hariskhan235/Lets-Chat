@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/screens/auth/login_screen.dart';
 import 'package:lets_chat/screens/profile_screen.dart';
@@ -34,6 +35,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     APIs.getMyInfo();
+    //APIs.updateActiveStatus(true);
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      print('Message $message');
+      if (APIs.auth.currentUser != null) {
+        if (message.toString().contains('resume')) {
+          APIs.updateActiveStatus(true);
+        }
+
+        if (message.toString().contains('pause')) {
+          APIs.updateActiveStatus(false);
+        }
+      }
+      return Future.value(message.toString());
+    });
+    ;
   }
 
   @override
@@ -112,9 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   case ConnectionState.active:
                     if (snapshot.hasData) {
                       final data = snapshot.data?.docs;
-                      _list = data!
-                          .map((e) => ChatUserModel.fromJson(e.data()))
-                          .toList();
+                      _list = data
+                              ?.map((e) => ChatUserModel.fromJson(e.data()))
+                              .toList() ??
+                          [];
                     }
                     if (_list.isNotEmpty) {
                       return ListView.builder(

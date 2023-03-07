@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:lets_chat/screens/demo_screen.dart';
 import 'package:lets_chat/screens/splash_screen.dart';
 import 'firebase_options.dart';
 

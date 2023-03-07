@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
@@ -166,9 +168,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.redAccent,
             onPressed: () async {
               Dialogs.showProgressBar(context);
+              await APIs.updateActiveStatus(false);
               await APIs.auth.signOut().then((value) async {
                 await GoogleSignIn().signOut().then((value) {
                   Navigator.of(context).pop();
+                  APIs.auth = FirebaseAuth.instance;
                   //Navigator.of(context).pop();
                   navigateToLogin(context);
                 });
