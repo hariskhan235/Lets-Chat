@@ -13,9 +13,13 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return APIs.user.uid == widget.message.fromId
-        ? _greenMessage()
-        : _blueMessage();
+    bool isMe = APIs.user.uid == widget.message.fromId;
+    return InkWell(
+      onLongPress: () {
+        _showModalBottomSheet();
+      },
+      child: isMe ? _greenMessage() : _blueMessage(),
+    );
   }
 
   Widget _greenMessage() {
@@ -92,6 +96,7 @@ class _MessageCardState extends State<MessageCard> {
     // if (widget.message.read.isEmpty) {
     //   APIs.updateMessageReadStatus(widget.message);
     // }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -118,25 +123,61 @@ class _MessageCardState extends State<MessageCard> {
           ),
         ),
         Padding(
-          padding:
-              EdgeInsets.only(right: MediaQuery.of(context).size.width * .04),
-          child: widget.message.type == MessageType.text
-              ? Text(
-                  widget.message.msg,
-                  style: TextStyle(fontSize: 15, color: Colors.black54),
-                )
-              : Container(
-                  width: MediaQuery.of(context).size.width * .5,
-                  height: MediaQuery.of(context).size.height * .3,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(widget.message.msg),
+            padding:
+                EdgeInsets.only(right: MediaQuery.of(context).size.width * .04),
+            child: widget.message.type == MessageType.image
+                ? Container(
+                    width: MediaQuery.of(context).size.width * .5,
+                    height: MediaQuery.of(context).size.height * .3,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(widget.message.msg),
+                      ),
                     ),
-                  ),
-                ),
+                  )
+                : SizedBox()),
+        Text(
+          widget.message.sent,
+          style: TextStyle(fontSize: 13, color: Colors.black54),
         ),
       ],
     );
+  }
+
+  void _showModalBottomSheet() {
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        context: context,
+        builder: (_) {
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                height: 4,
+                margin: EdgeInsets.symmetric(
+                    vertical: MediaQuery.of(context).size.width * .015,
+                    horizontal: MediaQuery.of(context).size.height * .4),
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              Text(
+                'Profile Picture',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * .02,
+              ),
+            ],
+          );
+        });
   }
 }

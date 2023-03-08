@@ -26,6 +26,13 @@ class APIs {
         print('Token is $token');
       }
     });
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message from foreground');
+      print('Message Data : ${message.data}');
+      if (message.notification != null) {
+        print('Message also contained Notification : ${message.notification}');
+      }
+    });
   }
 
   static Future<void> sendPushNotification(
@@ -36,6 +43,10 @@ class APIs {
         "notification": {
           "title": chatuser.name,
           "body": msg,
+          "android_channel_id": "chats"
+        },
+        "data": {
+          "some_data": " User ID ${me.id}:",
         }
       };
       var response = await http.post(
@@ -151,7 +162,7 @@ class APIs {
       ChatUserModel chatUser) {
     return firestore
         .collection('chats/${getConversationId(chatUser.id)}/messages/')
-        .orderBy('sent', descending: false)
+        .orderBy('sent', descending: true)
         .snapshots();
   }
 
@@ -193,7 +204,7 @@ class APIs {
       ChatUserModel user) {
     return firestore
         .collection('chats/${getConversationId(user.id)}/messages/')
-        .orderBy('sent', descending: false)
+        .orderBy('sent')
         .limit(1)
         .snapshots();
   }
