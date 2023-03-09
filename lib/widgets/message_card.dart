@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lets_chat/apis/apis.dart';
+import 'package:lets_chat/helpers/dialogs.dart';
 import 'package:lets_chat/models/message_model.dart';
 
 class MessageCard extends StatefulWidget {
@@ -16,7 +18,7 @@ class _MessageCardState extends State<MessageCard> {
     bool isMe = APIs.user.uid == widget.message.fromId;
     return InkWell(
       onLongPress: () {
-        _showModalBottomSheet();
+        _showModalBottomSheet(isMe);
       },
       child: isMe ? _greenMessage() : _blueMessage(),
     );
@@ -123,20 +125,21 @@ class _MessageCardState extends State<MessageCard> {
           ),
         ),
         Padding(
-            padding:
-                EdgeInsets.only(right: MediaQuery.of(context).size.width * .04),
-            child: widget.message.type == MessageType.image
-                ? Container(
-                    width: MediaQuery.of(context).size.width * .5,
-                    height: MediaQuery.of(context).size.height * .3,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(widget.message.msg),
-                      ),
+          padding:
+              EdgeInsets.only(right: MediaQuery.of(context).size.width * .04),
+          child: widget.message.type == MessageType.image
+              ? Container(
+                  width: MediaQuery.of(context).size.width * .5,
+                  height: MediaQuery.of(context).size.height * .3,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(widget.message.msg),
                     ),
-                  )
-                : SizedBox()),
+                  ),
+                )
+              : SizedBox(),
+        ),
         Text(
           widget.message.sent,
           style: TextStyle(fontSize: 13, color: Colors.black54),
@@ -145,39 +148,123 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  void _showModalBottomSheet() {
+  void _showModalBottomSheet(bool isMe) {
     showModalBottomSheet(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
-        context: context,
-        builder: (_) {
-          return ListView(
-            shrinkWrap: true,
-            children: [
-              Container(
-                height: 4,
-                margin: EdgeInsets.symmetric(
-                    vertical: MediaQuery.of(context).size.width * .015,
-                    horizontal: MediaQuery.of(context).size.height * .4),
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(8),
+      ),
+      context: context,
+      builder: (_) {
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            Container(
+              height: 4,
+              margin: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width * .015,
+                  horizontal: MediaQuery.of(context).size.height * .4),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            widget.message.type == MessageType.text
+                ? OptionIteem(
+                    icon: Icon(
+                      Icons.copy_all_rounded,
+                      size: 26,
+                      color: Colors.blue,
+                    ),
+                    name: 'Copy Text',
+                    onTap: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: widget.message.msg),
+                      ).then((value) {
+                        Navigator.of(context).pop();
+                        Dialogs.showSnackBar(context, 'Text Copied');
+                      });
+                    },
+                  )
+                : OptionIteem(
+                    icon: Icon(
+                      Icons.download,
+                      size: 26,
+                      color: Colors.blue,
+                    ),
+                    name: 'Save Image',
+                    onTap: () {},
+                  ),
+            Divider(
+              color: Colors.black54,
+              endIndent: MediaQuery.of(context).size.width * .04,
+              indent: MediaQuery.of(context).size.width * .04,
+            ),
+            if (widget.message.type == MessageType.text && isMe)
+              OptionIteem(
+                icon: Icon(
+                  Icons.edit,
+                  size: 26,
+                  color: Colors.blue,
+                ),
+                name: 'Edit Message',
+                onTap: () {},
+              ),
+            OptionIteem(
+              icon: Icon(
+                Icons.delete,
+                size: 26,
+                color: Colors.red,
+              ),
+              name: 'Delete Message',
+              onTap: () async {
+                await APIs.deleteMsg(widget.message).then(
+                  (value) {
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class OptionIteem extends StatelessWidget {
+  const OptionIteem(
+      {super.key, required this.icon, required this.name, required this.onTap});
+  final Icon icon;
+  final String name;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap(),
+      child: Padding(
+        padding: EdgeInsets.only(
+            left: MediaQuery.of(context).size.width * .05,
+            top: MediaQuery.of(context).size.height * .015,
+            bottom: MediaQuery.of(context).size.height * .025),
+        child: Row(
+          children: [
+            icon,
+            Flexible(
+              child: Text(
+                '   $name',
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 15,
                 ),
               ),
-              Text(
-                'Profile Picture',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * .02,
-              ),
-            ],
-          );
-        });
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
