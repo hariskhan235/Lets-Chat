@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:lets_chat/apis/apis.dart';
 import 'package:lets_chat/helpers/dialogs.dart';
 import 'package:lets_chat/models/message_model.dart';
@@ -195,7 +196,24 @@ class _MessageCardState extends State<MessageCard> {
                       color: Colors.blue,
                     ),
                     name: 'Save Image',
-                    onTap: () {},
+                    onTap: () async {
+                      try {
+                        print(widget.message.msg);
+                        await GallerySaver.saveImage(widget.message.msg,
+                                albumName: 'Lets Chat')
+                            .then(
+                          (value) {
+                            Navigator.of(context).pop();
+                            if (value != null && value) {
+                              Dialogs.showSnackBar(
+                                  context, 'Image Saved Successfully');
+                            }
+                          },
+                        );
+                      } catch (e) {
+                        print('Error is $e');
+                      }
+                    },
                   ),
             Divider(
               color: Colors.black54,
@@ -210,7 +228,10 @@ class _MessageCardState extends State<MessageCard> {
                   color: Colors.blue,
                 ),
                 name: 'Edit Message',
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showMessageEditDialog();
+                },
               ),
             OptionIteem(
               icon: Icon(
@@ -230,6 +251,61 @@ class _MessageCardState extends State<MessageCard> {
           ],
         );
       },
+    );
+  }
+
+  void _showMessageEditDialog() {
+    String updatedMsg = widget.message.msg;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.update,
+              color: Colors.blue,
+              size: 28,
+            ),
+            Text(' Update Message')
+          ],
+        ),
+        content: TextFormField(
+          onChanged: (value) => updatedMsg = value,
+          maxLines: null,
+          initialValue: updatedMsg,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        actions: [
+          MaterialButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          ),
+          MaterialButton(
+            onPressed: () async {
+              await APIs.updateMsg(widget.message, updatedMsg);
+              Navigator.pop(context);
+              //setState(() {});
+            },
+            child: Text(
+              'Update',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          )
+        ],
+      ),
     );
   }
 }

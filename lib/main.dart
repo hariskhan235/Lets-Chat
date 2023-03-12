@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Let\'s chat',
       theme: ThemeData(
+        primaryColor: Colors.black,
         useMaterial3: true,
         appBarTheme: AppBarTheme(
           elevation: 1,
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
             fontSize: 19,
           ),
         ),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       home: SplashScreen(),
     );

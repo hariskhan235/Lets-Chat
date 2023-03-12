@@ -275,11 +275,15 @@ class _ChatScreenState extends State<ChatScreen> {
               shape: CircleBorder(),
               onPressed: () {
                 if (_messageController.text.isNotEmpty) {
-                  APIs.sendMessage(widget.user, _messageController.text.trim(),
-                          MessageType.text)
-                      .then((value) {
-                    _messageController.text = '';
-                  });
+                  if (_list.isEmpty) {
+                    APIs.sendFirstMessage(
+                        widget.user, _messageController.text, MessageType.text);
+                  } else
+                    APIs.sendMessage(widget.user,
+                            _messageController.text.trim(), MessageType.text)
+                        .then((value) {
+                      _messageController.text = '';
+                    });
                 }
               },
               child: Icon(

@@ -69,6 +69,24 @@ class APIs {
     return (await firestore.collection('users').doc(user.uid).get()).exists;
   }
 
+  static Future<bool> addChatUser(String email) async {
+    final data = await firestore
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (data.docs.isNotEmpty && data.docs.first.id != user.uid) {
+      firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('my_users')
+          .doc(data.docs.first.id)
+          .set({});
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static Future<void> updateProfileData() async {
     return await firestore.collection('users').doc(user.uid).update({
       'name': me.name,
@@ -106,11 +124,32 @@ class APIs {
         );
   }
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers() {
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers(
+      List<String> userIds) {
     return firestore
         .collection('users')
-        .where('id', isNotEqualTo: user.uid)
+        .where('id', whereIn: userIds.isEmpty ? [''] : userIds)
         .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyUsers() {
+    return firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('my_users')
+        .snapshots();
+  }
+
+  static Future<void> sendFirstMessage(
+      ChatUserModel chatUser, String msg, MessageType type) async {
+    await firestore
+        .collection('users')
+        .doc(chatUser.id)
+        .collection('my_users')
+        .doc(user.uid)
+        .set({}).then(
+      (value) => sendMessage(chatUser, msg, type),
+    );
   }
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
@@ -232,5 +271,14 @@ class APIs {
     if (message.type == MessageType.image) {
       await storage.refFromURL(message.msg).delete();
     }
+  }
+
+  static Future<void> updateMsg(MessageModel message, String updatedMsg) async {
+    await firestore
+        .collection('chats/${getConversationId(message.toId)}/messages/')
+        .doc(message.sent)
+        .update({
+      'msg': updatedMsg,
+    });
   }
 }

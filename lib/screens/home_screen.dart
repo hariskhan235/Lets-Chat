@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lets_chat/helpers/dialogs.dart';
 import 'package:lets_chat/models/chat_user_model.dart';
 import 'package:lets_chat/screens/auth/login_screen.dart';
 import 'package:lets_chat/screens/profile_screen.dart';
@@ -116,51 +117,145 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // body of the home screen
           body: StreamBuilder(
-              stream: APIs.getAllUsers(),
+              stream: APIs.getMyUsers(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
                   case ConnectionState.none:
+                  case ConnectionState.waiting:
                     return Center(
                       child: CircularProgressIndicator(),
                     );
-                  case ConnectionState.done:
                   case ConnectionState.active:
-                    if (snapshot.hasData) {
-                      final data = snapshot.data?.docs;
-                      _list = data
-                              ?.map((e) => ChatUserModel.fromJson(e.data()))
-                              .toList() ??
-                          [];
-                    }
-                    if (_list.isNotEmpty) {
-                      return ListView.builder(
-                          itemCount:
-                              _isSearching ? _searchList.length : _list.length,
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).size.height * .01),
-                          physics: BouncingScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return ChatUserCard(
-                              user: _isSearching
-                                  ? _searchList[index]
-                                  : _list[index],
-                            );
-                            //return Text('Name : ${list[index]}');
-                          });
-                    } else {
-                      return Center(
-                        child: Text('No connection Found'),
-                      );
-                    }
+                  case ConnectionState.done:
+                    return StreamBuilder(
+                        stream: APIs.getAllUsers(
+                          snapshot.data?.docs.map((e) => e.id).toList() ?? [],
+                        ),
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.waiting:
+                            case ConnectionState.none:
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            case ConnectionState.done:
+                            case ConnectionState.active:
+                              if (snapshot.hasData) {
+                                final data = snapshot.data?.docs;
+                                _list = data
+                                        ?.map((e) =>
+                                            ChatUserModel.fromJson(e.data()))
+                                        .toList() ??
+                                    [];
+                              }
+                              if (_list.isNotEmpty) {
+                                return ListView.builder(
+                                    itemCount: _isSearching
+                                        ? _searchList.length
+                                        : _list.length,
+                                    padding: EdgeInsets.only(
+                                        top:
+                                            MediaQuery.of(context).size.height *
+                                                .01),
+                                    physics: BouncingScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      return ChatUserCard(
+                                        user: _isSearching
+                                            ? _searchList[index]
+                                            : _list[index],
+                                      );
+                                      //return Text('Name : ${list[index]}');
+                                    });
+                              } else {
+                                return Center(
+                                  child: Text('No connection Found'),
+                                );
+                              }
 
-                  default:
-                    break;
+                            default:
+                              break;
+                          }
+                          return Text('Data');
+                        });
                 }
-                return Text('Data');
               }),
+          floatingActionButton: Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: FloatingActionButton(
+              onPressed: () async {
+                _showAddUserDialog();
+              },
+              child: Icon(
+                Icons.add_comment_rounded,
+                color: Theme.of(context).iconTheme.color,
+              ),
+            ),
+          ),
           // button to add new user to the chat
         ),
+      ),
+    );
+  }
+
+  void _showAddUserDialog() {
+    String email = '';
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.person,
+              color: Colors.blue,
+              size: 28,
+            ),
+            Text(' Add User')
+          ],
+        ),
+        content: TextFormField(
+          onChanged: (value) => email = value,
+          maxLines: null,
+          decoration: InputDecoration(
+            hintText: 'Email',
+            prefixIcon: Icon(
+              Icons.email,
+              color: Colors.blue,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        actions: [
+          MaterialButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          ),
+          MaterialButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              if (email.isNotEmpty)
+                APIs.addChatUser(email).then((value) {
+                  if (value == false) {
+                    Dialogs.showSnackBar(context, 'User does not exist');
+                  }
+                });
+            },
+            child: Text(
+              'Add',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          )
+        ],
       ),
     );
   }
